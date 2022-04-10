@@ -9,6 +9,7 @@ import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { sanityClient, urlFor } from '../../sanity';
 import { Collection } from '../../typings';
 
@@ -64,6 +65,16 @@ const NFTDropPage = ({ collection }: Props) => {
 
     setLoading(true);
 
+    const notification = toast.loading('Minting...', {
+      style: {
+        background: 'white',
+        color: 'green',
+        fontSize: '17px',
+        fontWeight: 'bolder',
+        padding: '20px',
+      },
+    });
+
     nftDrop
       ?.claimTo(address, quantity)
       .then(async (tx) => {
@@ -71,15 +82,18 @@ const NFTDropPage = ({ collection }: Props) => {
         const claimedTokenID = tx[0].id;
         const claimedNFT = await tx[0].data();
 
+        toast.success('Mint Succesful');
+
         console.log(recipt);
         console.log(claimedTokenID);
         console.log(claimedNFT);
       })
       .catch((err) => {
-        console.log(err.message);
+        toast.error('minting failed');
       })
       .finally(() => {
         setLoading(false);
+        toast.dismiss(notification);
       });
   };
 
@@ -91,6 +105,8 @@ const NFTDropPage = ({ collection }: Props) => {
       </Head>
 
       <div className="flex min-h-screen flex-col lg:grid lg:grid-cols-10">
+        <Toaster position="bottom-center" />
+
         <div className="bg-gradient-to-br from-cyan-800 to-rose-500 lg:col-span-4">
           <div className="flex flex-col items-center justify-center py-2 lg:min-h-screen">
             <div className="rounded-xl bg-gradient-to-br from-yellow-400 to-purple-600 p-2">
@@ -116,9 +132,8 @@ const NFTDropPage = ({ collection }: Props) => {
           <header className="flex items-center justify-between">
             <Link href="/">
               <h1 className="w-52 cursor-pointer text-xl font-extralight sm:w-80">
-                The{' '}
                 <span className="font-extrabold underline decoration-pink-600/50">
-                  PAPAFAM
+                  VIRUS
                 </span>{' '}
                 NFT Market Place
               </h1>
